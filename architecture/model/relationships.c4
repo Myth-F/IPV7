@@ -1,0 +1,38 @@
+model {
+  user -> mcpHost 'asks questions and approves actions'
+  mcpHost -> ipv7.mcpBackend.mcpServer 'calls through MCP'
+
+  ipv7.mcpBackend.mcpServer -> ipv7.mcpBackend.authentication 'validates request'
+  ipv7.mcpBackend.authentication -> ipv7.mcpBackend.policyEngine 'evaluates identity and policy'
+  ipv7.mcpBackend.policyEngine -> ipv7.mcpBackend.toolRouter 'routes allowed calls'
+
+  ipv7.mcpBackend.toolRouter -> ipv7.mcpBackend.queryProcessor 'starts retrieval'
+  ipv7.mcpBackend.queryProcessor -> ipv7.mcpBackend.hybridRetriever 'submits normalized query'
+  ipv7.mcpBackend.hybridRetriever -> ipv7.knowledgeIndex 'queries vectors, text and ACLs'
+  ipv7.mcpBackend.hybridRetriever -> ipv7.mcpBackend.contentGuard 'returns candidates'
+  ipv7.mcpBackend.contentGuard -> ipv7.mcpBackend.reranker 'passes screened candidates'
+  ipv7.mcpBackend.reranker -> ipv7.mcpBackend.contextBuilder 'returns ranked evidence'
+  ipv7.mcpBackend.reranker -> ipv7.mcpBackend.modelGateway 'requests ranking'
+  ipv7.mcpBackend.contextBuilder -> mcpHost 'returns grounded evidence and citations'
+  ipv7.mcpBackend.modelGateway -> modelProviders 'calls controlled model endpoints'
+
+  ipv7.mcpBackend.toolRouter -> ipv7.mcpBackend.outboundBroker 'starts governed action'
+  ipv7.tokenVault -> ipv7.mcpBackend.outboundBroker 'provides scoped per-user token'
+  ipv7.mcpBackend.outboundBroker -> ipv7.mcpBackend.confirmation 'binds exact action plan'
+  ipv7.mcpBackend.confirmation -> user 'requests explicit confirmation'
+  ipv7.mcpBackend.confirmation -> googleWorkspace 'executes approved action'
+
+  googleWorkspace -> ipv7.syncWorker.changeConnector 'publishes or exposes changes'
+  googleIdentity -> ipv7.syncWorker.reconciliation 'provides users, groups and ACLs'
+  ipv7.syncWorker.changeConnector -> ipv7.eventQueue 'enqueues change jobs'
+  ipv7.syncWorker.reconciliation -> ipv7.eventQueue 'enqueues repair jobs'
+  ipv7.eventQueue -> ipv7.syncWorker.documentPipeline 'delivers idempotent jobs'
+  ipv7.syncWorker.documentPipeline -> ipv7.mcpBackend.modelGateway 'requests embeddings'
+  ipv7.syncWorker.documentPipeline -> ipv7.syncWorker.indexWriter 'produces versioned chunks'
+  ipv7.syncWorker.indexWriter -> ipv7.knowledgeIndex 'upserts, deletes and updates ACLs'
+
+  ipv7.mcpBackend.contextBuilder -> ipv7.audit 'records retrieval trace'
+  ipv7.mcpBackend.outboundBroker -> ipv7.audit 'records tool decisions'
+  ipv7.syncWorker.documentPipeline -> ipv7.audit 'records synchronization metrics'
+}
+

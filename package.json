@@ -1,0 +1,15 @@
+{
+  "name": "ipv7",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Architecture-as-code workspace for IPV7",
+  "scripts": {
+    "architecture:dev": "likec4 serve",
+    "architecture:validate": "likec4 validate",
+    "architecture:build": "likec4 build"
+  },
+  "devDependencies": {
+    "likec4": "1.47.0"
+  }
+}
+

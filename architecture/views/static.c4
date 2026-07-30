@@ -1,0 +1,54 @@
+views {
+  view ipv7_context {
+    title 'IPV7 — System Context'
+    description 'People and external systems interacting with IPV7'
+
+    include
+      user,
+      mcpHost,
+      ipv7,
+      googleWorkspace,
+      googleIdentity,
+      modelProviders
+
+    autoLayout LeftRight
+  }
+
+  view ipv7_containers of ipv7 {
+    title 'IPV7 — Containers'
+    description 'Deployable runtimes, data stores and external dependencies'
+
+    include
+      *,
+      user,
+      mcpHost,
+      googleWorkspace,
+      googleIdentity,
+      modelProviders
+
+    exclude element.kind = component
+
+    include
+      ipv7.mcpBackend with {
+        navigateTo mcp_backend_components
+      },
+      ipv7.syncWorker with {
+        navigateTo knowledge_base_components
+      },
+      mcpHost -> ipv7.mcpBackend,
+      ipv7.mcpBackend -> ipv7.knowledgeIndex,
+      ipv7.tokenVault -> ipv7.mcpBackend,
+      ipv7.mcpBackend -> ipv7.audit,
+      ipv7.mcpBackend -> googleWorkspace,
+      ipv7.mcpBackend -> modelProviders,
+      googleWorkspace -> ipv7.syncWorker,
+      googleIdentity -> ipv7.syncWorker,
+      ipv7.syncWorker -> ipv7.eventQueue,
+      ipv7.eventQueue -> ipv7.syncWorker,
+      ipv7.syncWorker -> ipv7.mcpBackend,
+      ipv7.syncWorker -> ipv7.knowledgeIndex,
+      ipv7.syncWorker -> ipv7.audit
+
+    autoLayout LeftRight
+  }
+}

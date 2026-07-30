@@ -1,0 +1,50 @@
+views {
+  dynamic view rag_query_flow {
+    title 'RAG query — grounded answer'
+
+    user -> mcpHost 'asks a question'
+    mcpHost -> ipv7.mcpBackend.mcpServer 'tools/call'
+    ipv7.mcpBackend.mcpServer -> ipv7.mcpBackend.authentication 'validates request'
+    ipv7.mcpBackend.authentication -> ipv7.mcpBackend.policyEngine 'checks policy'
+    ipv7.mcpBackend.policyEngine -> ipv7.mcpBackend.toolRouter 'ALLOW'
+    ipv7.mcpBackend.toolRouter -> ipv7.mcpBackend.queryProcessor 'routes query'
+    ipv7.mcpBackend.queryProcessor -> ipv7.mcpBackend.hybridRetriever 'normalized query'
+    ipv7.mcpBackend.hybridRetriever -> ipv7.knowledgeIndex 'hybrid ACL query'
+    ipv7.mcpBackend.hybridRetriever -> ipv7.mcpBackend.contentGuard 'retrieved candidates'
+    ipv7.mcpBackend.contentGuard -> ipv7.mcpBackend.reranker 'screened candidates'
+    ipv7.mcpBackend.reranker -> ipv7.mcpBackend.contextBuilder 'ranked evidence'
+    ipv7.mcpBackend.contextBuilder -> mcpHost 'evidence, versions and citations'
+    mcpHost -> user 'grounded answer'
+  }
+
+  dynamic view governed_action_flow {
+    title 'Governed action — confirmed Google Workspace change'
+
+    user -> mcpHost 'requests an action'
+    mcpHost -> ipv7.mcpBackend.mcpServer 'tools/call'
+    ipv7.mcpBackend.mcpServer -> ipv7.mcpBackend.authentication 'validates request'
+    ipv7.mcpBackend.authentication -> ipv7.mcpBackend.policyEngine 'checks policy'
+    ipv7.mcpBackend.policyEngine -> ipv7.mcpBackend.toolRouter 'ALLOW'
+    ipv7.mcpBackend.toolRouter -> ipv7.mcpBackend.outboundBroker 'routes governed action'
+    ipv7.tokenVault -> ipv7.mcpBackend.outboundBroker 'scoped user token'
+    ipv7.mcpBackend.outboundBroker -> ipv7.mcpBackend.confirmation 'binds exact plan'
+    ipv7.mcpBackend.confirmation -> user 'requests confirmation'
+    user -> ipv7.mcpBackend.confirmation 'approves bound plan'
+    ipv7.mcpBackend.confirmation -> googleWorkspace 'executes approved change'
+    ipv7.mcpBackend.outboundBroker -> ipv7.audit 'records decision'
+  }
+
+  dynamic view synchronization_flow {
+    title 'Synchronization — Google Workspace to derived index'
+
+    googleWorkspace -> ipv7.syncWorker.changeConnector 'change detected'
+    ipv7.syncWorker.changeConnector -> ipv7.eventQueue 'enqueues idempotent job'
+    ipv7.eventQueue -> ipv7.syncWorker.documentPipeline 'delivers job'
+    ipv7.syncWorker.documentPipeline -> ipv7.mcpBackend.modelGateway 'requests embeddings'
+    ipv7.mcpBackend.modelGateway -> modelProviders 'embedding call'
+    ipv7.syncWorker.documentPipeline -> ipv7.syncWorker.indexWriter 'versioned chunks and ACLs'
+    ipv7.syncWorker.indexWriter -> ipv7.knowledgeIndex 'upsert or delete'
+    ipv7.syncWorker.documentPipeline -> ipv7.audit 'records freshness and quality'
+  }
+}
+

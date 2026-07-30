@@ -1,0 +1,8 @@
+# Dependencies and generated architecture output
+node_modules/
+dist/
+
+# Draw.io working files
+*.drawio
+*.drawio.xml
+

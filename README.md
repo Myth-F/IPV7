@@ -27,6 +27,12 @@ It uses access-aware retrieval-augmented generation to produce grounded answers 
 
 IPV7 is currently in the architecture and prototyping stage. This repository will evolve as the platform is implemented.
 
+## Architecture
+
+The architecture is documented as code with LikeC4. See
+[`architecture/README.md`](architecture/README.md) for the model structure,
+available views, and local commands.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

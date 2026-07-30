@@ -1,0 +1,114 @@
+model {
+  user = actor 'Workspace user' {
+    description 'Asks questions and approves sensitive actions'
+  }
+
+  mcpHost = externalSystem 'LLM / MCP Host' {
+    description 'AI assistant that calls IPV7 through MCP and produces the final answer. Can be a chat interface, a voice assistant, or a command-line tool.'
+  }
+
+  googleWorkspace = externalSystem 'Google Workspace' {
+    description 'Authoritative documents, files, folders and shared drives'
+  }
+
+  googleIdentity = externalSystem 'Google Identity' {
+    description 'Authoritative users, groups and access-control information'
+  }
+
+  modelProviders = externalSystem 'AI model providers' {
+    description 'Embedding and reranking model endpoints'
+  }
+
+  ipv7 = system 'IPV7' {
+    description 'Secure, ACL-aware RAG and governed-action platform'
+
+    mcpBackend = container 'MCP Backend' {
+      description 'Handles MCP requests, authorization, retrieval and governed actions'
+
+      mcpServer = component 'MCP Server' {
+        description 'Exposes the IPV7 MCP interface'
+      }
+
+      authentication = component 'Authentication' {
+        description 'Validates caller identity and OAuth credentials'
+      }
+
+      policyEngine = component 'Policy Engine' {
+        description 'Returns an explicit ALLOW or DENY decision'
+      }
+
+      toolRouter = component 'Tool Router' {
+        description 'Routes authorized calls to retrieval or action capabilities(depending on the request)'
+      }
+
+      queryProcessor = component 'Query Processor' {
+        description 'Rewrites the query and applies language and metadata filters'
+      }
+
+      hybridRetriever = component 'Hybrid Retriever' {
+        description 'Combines vector, lexical and ACL-aware retrieval'
+      }
+
+      contentGuard = component 'Content Guard' {
+        description 'Treats retrieved content as untrusted and screens prompt injection'
+      }
+
+      reranker = component 'Reranker' {
+        description 'Orders candidates by relevance and diversity'
+      }
+
+      contextBuilder = component 'Grounded Context Builder' {
+        description 'Builds a deduplicated, cited context within the token budget'
+      }
+
+      modelGateway = component 'Model Gateway' {
+        description 'Provides a controlled boundary to embedding and reranking models'
+      }
+
+      outboundBroker = component 'Outbound MCP Broker' {
+        description 'Uses scoped official clients for outbound tools'
+      }
+
+      confirmation = component 'Confirmation Coordinator' {
+        description 'Binds an exact action plan to fresh authorization and user approval'
+      }
+    }
+
+    syncWorker = container 'Synchronization Worker' {
+      description 'Maintains a derived index from Google Workspace changes'
+
+      changeConnector = component 'Drive Change Connector' {
+        description 'Consumes watch notifications, polling results and page tokens'
+      }
+
+      reconciliation = component 'Reconciliation Scheduler' {
+        description 'Repairs missed changes and permission drift through full scans'
+      }
+
+      documentPipeline = component 'Document Pipeline' {
+        description 'Extracts, classifies, chunks, embeds and versions documents'
+      }
+
+      indexWriter = component 'Index Writer' {
+        description 'Applies idempotent upserts, deletes and ACL changes'
+      }
+    }
+
+    knowledgeIndex = database 'Hybrid Knowledge Index' {
+      description 'Derived vectors, lexical index, metadata, versions and ACLs'
+    }
+
+    eventQueue = queue 'Event Queue' {
+      description 'Idempotent jobs, retries and dead-letter handling'
+    }
+
+    tokenVault = database 'OAuth Token Vault' {
+      description 'Per-user scoped tokens, rotation and revocation state'
+    }
+
+    audit = container 'Audit & Evaluation' {
+      description 'Traces, decisions, freshness, quality, cost and golden-set evaluation'
+    }
+  }
+}
+

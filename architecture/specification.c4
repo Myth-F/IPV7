@@ -1,0 +1,38 @@
+specification {
+  element actor {
+    style {
+      shape person
+      color gray
+    }
+  }
+
+  element system {
+    style {
+      color blue
+    }
+  }
+
+  element externalSystem {
+    style {
+      color gray
+    }
+  }
+
+  element container
+  element component
+
+  element database {
+    style {
+      shape storage
+      color green
+    }
+  }
+
+  element queue {
+    style {
+      shape queue
+      color amber
+    }
+  }
+}
+

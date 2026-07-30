@@ -1,0 +1,103 @@
+views {
+  view mcp_backend_components of ipv7.mcpBackend {
+    title 'IPV7 — MCP Backend Components'
+    description 'Entry view showing the shared security path and both RAG and governed-action branches'
+
+    include
+      mcpServer,
+      authentication,
+      policyEngine,
+      toolRouter,
+      queryProcessor with {
+        navigateTo rag_runtime_components
+      },
+      hybridRetriever,
+      contentGuard,
+      reranker,
+      contextBuilder,
+      modelGateway,
+      outboundBroker with {
+        navigateTo governed_actions_components
+      },
+      confirmation,
+      mcpHost,
+      googleWorkspace,
+      modelProviders,
+      ipv7.knowledgeIndex,
+      ipv7.tokenVault
+
+    style queryProcessor, hybridRetriever, contentGuard, reranker, contextBuilder, modelGateway {
+      color blue
+    }
+
+    style outboundBroker, confirmation {
+      color amber
+    }
+
+    autoLayout LeftRight
+  }
+
+  view rag_runtime_components of ipv7.mcpBackend {
+    title 'IPV7 — RAG Runtime Components'
+    description 'Authentication and ACL-aware retrieval for one grounded answer'
+
+    include
+      mcpServer,
+      authentication,
+      policyEngine,
+      toolRouter,
+      queryProcessor,
+      hybridRetriever,
+      contentGuard,
+      reranker,
+      contextBuilder,
+      modelGateway,
+      user,
+      mcpHost,
+      modelProviders,
+      ipv7.knowledgeIndex,
+      ipv7.audit
+
+    autoLayout LeftRight
+  }
+
+  view knowledge_base_components of ipv7.syncWorker {
+    title 'IPV7 — Knowledge Base Components'
+    description 'Source ingestion, reconciliation and maintenance of the derived knowledge index'
+
+    include
+      changeConnector,
+      reconciliation,
+      documentPipeline,
+      indexWriter,
+      googleWorkspace,
+      googleIdentity,
+      modelProviders,
+      ipv7.eventQueue,
+      ipv7.knowledgeIndex,
+      ipv7.mcpBackend.modelGateway,
+      ipv7.audit
+
+    autoLayout LeftRight
+  }
+
+  view governed_actions_components of ipv7.mcpBackend {
+    title 'IPV7 — Governed Actions Components'
+    description 'Authentication, scoped credentials, bound plans and explicit user confirmation'
+
+    include
+      mcpServer,
+      authentication,
+      policyEngine,
+      toolRouter,
+      outboundBroker,
+      confirmation,
+      user,
+      mcpHost,
+      googleWorkspace,
+      ipv7.tokenVault,
+      ipv7.audit
+
+    autoLayout LeftRight
+  }
+}
