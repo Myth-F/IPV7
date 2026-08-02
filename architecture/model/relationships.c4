@@ -3,8 +3,9 @@ model {
   mcpHost -> ipv7.mcpBackend.mcpServer 'calls through MCP'
 
   ipv7.mcpBackend.mcpServer -> ipv7.mcpBackend.authentication 'validates request'
-  ipv7.mcpBackend.authentication -> ipv7.mcpBackend.policyEngine 'evaluates identity and policy'
-  ipv7.mcpBackend.policyEngine -> ipv7.mcpBackend.toolRouter 'routes allowed calls'
+  ipv7.mcpBackend.authentication -> ipv7.mcpBackend.policyEngine 'passes principal and granted scopes'
+  ipv7.mcpBackend.policyEngine -> ipv7.tokenVault 'checks credential scopes and revocation state'
+  ipv7.mcpBackend.policyEngine -> ipv7.mcpBackend.toolRouter 'allows constrained capability'
 
   ipv7.mcpBackend.toolRouter -> ipv7.mcpBackend.queryProcessor 'starts retrieval'
   ipv7.mcpBackend.queryProcessor -> ipv7.mcpBackend.hybridRetriever 'submits normalized query'
@@ -16,11 +17,13 @@ model {
   ipv7.mcpBackend.contextBuilder -> mcpHost 'returns grounded evidence and citations'
   ipv7.mcpBackend.modelGateway -> modelProviders 'calls controlled model endpoints'
 
-  ipv7.mcpBackend.toolRouter -> ipv7.mcpBackend.outboundBroker 'starts governed action'
-  ipv7.tokenVault -> ipv7.mcpBackend.outboundBroker 'provides scoped per-user token'
+  ipv7.mcpBackend.toolRouter -> ipv7.mcpBackend.outboundBroker 'passes constrained action and opaque credential reference'
   ipv7.mcpBackend.outboundBroker -> ipv7.mcpBackend.confirmation 'binds exact action plan'
   ipv7.mcpBackend.confirmation -> user 'requests explicit confirmation'
-  ipv7.mcpBackend.confirmation -> googleWorkspace 'executes approved action'
+  ipv7.mcpBackend.confirmation -> ipv7.mcpBackend.policyEngine 'requests fresh authorization for approved plan'
+  ipv7.mcpBackend.policyEngine -> ipv7.mcpBackend.outboundBroker 'authorizes bound plan for execution'
+  ipv7.mcpBackend.outboundBroker -> ipv7.tokenVault 'obtains short-lived access token just in time'
+  ipv7.mcpBackend.outboundBroker -> googleWorkspace 'executes approved action'
 
   googleWorkspace -> ipv7.syncWorker.changeConnector 'publishes or exposes changes'
   googleIdentity -> ipv7.syncWorker.reconciliation 'provides users, groups and ACLs'
@@ -32,7 +35,6 @@ model {
   ipv7.syncWorker.indexWriter -> ipv7.knowledgeIndex 'upserts, deletes and updates ACLs'
 
   ipv7.mcpBackend.contextBuilder -> ipv7.audit 'records retrieval trace'
-  ipv7.mcpBackend.outboundBroker -> ipv7.audit 'records tool decisions'
+  ipv7.mcpBackend.outboundBroker -> ipv7.audit 'records tool decision and execution result'
   ipv7.syncWorker.documentPipeline -> ipv7.audit 'records synchronization metrics'
 }
-

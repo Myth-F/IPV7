@@ -34,11 +34,11 @@ model {
       }
 
       policyEngine = component 'Policy Engine' {
-        description 'Returns an explicit ALLOW or DENY decision'
+        description 'Evaluates identity, granted OAuth scopes, policy and credential state; returns an explicit ALLOW or DENY decision with constraints'
       }
 
       toolRouter = component 'Tool Router' {
-        description 'Routes authorized calls to retrieval or action capabilities(depending on the request)'
+        description 'Routes constrained capabilities with an opaque credential reference and never handles OAuth token material'
       }
 
       queryProcessor = component 'Query Processor' {
@@ -66,11 +66,11 @@ model {
       }
 
       outboundBroker = component 'Outbound MCP Broker' {
-        description 'Uses scoped official clients for outbound tools'
+        description 'Obtains scoped OAuth access tokens just in time and executes outbound tools through official clients'
       }
 
       confirmation = component 'Confirmation Coordinator' {
-        description 'Binds an exact action plan to fresh authorization and user approval'
+        description 'Binds an exact action plan to user approval and requests fresh authorization before execution'
       }
     }
 
@@ -103,7 +103,7 @@ model {
     }
 
     tokenVault = database 'OAuth Token Vault' {
-      description 'Per-user scoped tokens, rotation and revocation state'
+      description 'Encrypted per-user tokens plus scope, expiry and revocation metadata; secret material is only released to the Outbound MCP Broker'
     }
 
     audit = container 'Audit & Evaluation' {
@@ -111,4 +111,3 @@ model {
     }
   }
 }
-

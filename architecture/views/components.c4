@@ -83,7 +83,7 @@ views {
 
   view governed_actions_components of ipv7.mcpBackend {
     title 'IPV7 — Governed Actions Components'
-    description 'Authentication, scoped credentials, bound plans and explicit user confirmation'
+    description 'Credential metadata checks, constrained routing, bound plans, fresh authorization and just-in-time token use'
 
     include
       mcpServer,

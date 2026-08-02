@@ -37,7 +37,7 @@ views {
       },
       mcpHost -> ipv7.mcpBackend,
       ipv7.mcpBackend -> ipv7.knowledgeIndex,
-      ipv7.tokenVault -> ipv7.mcpBackend,
+      ipv7.mcpBackend -> ipv7.tokenVault,
       ipv7.mcpBackend -> ipv7.audit,
       ipv7.mcpBackend -> googleWorkspace,
       ipv7.mcpBackend -> modelProviders,
